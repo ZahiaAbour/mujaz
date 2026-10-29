@@ -13,99 +13,167 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#F2F3EF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121714" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#111613" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600;700&family=Reem+Kufi:wght@700&display=swap">
 <style>
+/* Layout: newsprint column. Sticky masthead + segmented language control; a photo-led lead story; then the stream split into time bands (last hour / today / yesterday / earlier). */
 :root{
-  --paper:#F2F3EF; --surface:#FFFFFF; --ink:#18201C; --muted:#5E6B64; --rule:#D9DDD6;
-  --accent:#1E6A4E; --accent-soft:#E2EEE7;
+  --paper:#F2F3EF; --surface:#FFFFFF; --sunk:#E8EBE5; --ink:#17201B; --muted:#5D6A63; --faint:#8C978F; --rule:#DCE0D9;
+  --accent:#1E6A4E; --accent-soft:#E0EDE6; --new:#D2522E; --raise:#FFFFFF;
   --font-mast:"Reem Kufi","Noto Naskh Arabic",serif;
   --font-head:"Noto Naskh Arabic","Geeza Pro","Times New Roman",serif;
   --font-ui:"IBM Plex Sans Arabic","Geeza Pro",system-ui,-apple-system,sans-serif;
+  --r:12px;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root{
-  --paper:#121714; --surface:#1A211D; --ink:#E7ECE8; --muted:#97A39C; --rule:#2B3530;
-  --accent:#5FBF95; --accent-soft:#1D3229; color-scheme:dark}}
+  --paper:#111613; --surface:#19201C; --sunk:#202823; --ink:#E8EDE9; --muted:#9AA69F; --faint:#6E7A73; --rule:#29322D;
+  --accent:#62C499; --accent-soft:#1B3128; --new:#F08A62; --raise:#33403A; color-scheme:dark}}
+
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.6;
-  padding-bottom:env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent}
+  padding-bottom:env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
 .wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
-.mast{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px 6px}
-.mast h1{margin:0;font-family:var(--font-mast);font-size:30px;line-height:1}
-.mast h1 span{color:var(--accent)}
-.right{display:flex;align-items:center;gap:10px}
-.date{font-size:13px;color:var(--muted)}
-.refresh{appearance:none;border:1px solid var(--rule);background:var(--surface);color:var(--ink);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
-.refresh svg{width:18px;height:18px}
-.refresh.spin svg{animation:spin .8s linear infinite}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Header */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  -webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);
+  border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
+.mast{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px 8px}
+.brand{display:grid;gap:2px}
+.brand h1{margin:0;font-family:var(--font-mast);font-size:28px;line-height:1}
+.brand h1 span{color:var(--accent)}
+.brand small{font-size:12px;color:var(--muted)}
+.icons{display:flex;gap:8px}
+.ib{appearance:none;border:1px solid var(--rule);background:var(--surface);width:38px;height:38px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.ib svg{width:18px;height:18px}
+.ib[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(-360deg)}}
-.tabs{display:flex;gap:6px;padding-block:4px 10px}
-.tab{appearance:none;border:1px solid var(--rule);background:transparent;color:var(--ink);font:500 14px var(--font-ui);padding:6px 16px;border-radius:999px;cursor:pointer}
-.tab[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sources{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-block:14px 2px;padding-bottom:2px}
+
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sunk);border-radius:10px;padding:3px;margin-block:2px 10px;position:relative}
+.seg button{appearance:none;border:0;background:transparent;padding:7px 0;border-radius:8px;font-weight:500;font-size:14px;cursor:pointer;position:relative;z-index:1;color:var(--muted)}
+.seg button[aria-pressed="true"]{color:var(--ink)}
+.seg .thumb{position:absolute;top:3px;bottom:3px;width:calc((100% - 6px)/3);right:3px;background:var(--raise);border-radius:8px;box-shadow:0 1px 3px rgb(0 0 0 / .12);transition:transform .25s ease}
+
+.search{padding-block:0 10px}
+.search input{width:100%;border:1px solid var(--rule);background:var(--surface);border-radius:10px;padding:9px 12px;font:16px var(--font-ui);color:var(--ink)}
+
+/* Sources */
+.sources{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-block:14px 0;padding-bottom:2px}
 .sources::-webkit-scrollbar{display:none}
-.src{appearance:none;flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:500 13px var(--font-ui);padding:5px 11px;border-radius:6px;cursor:pointer}
-.src i{width:8px;height:8px;border-radius:2px;background:var(--c)}
-.src[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
-.status{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-block:10px 0}
-.stream{list-style:none;margin:0;padding:0 0 32px}
-.item{border-bottom:1px solid var(--rule)}
-.item a{display:grid;gap:4px;padding-block:14px;color:inherit;text-decoration:none}
-.meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.src{appearance:none;flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);font-weight:500;font-size:13px;padding:5px 11px;border-radius:999px;cursor:pointer}
+.src i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.src[aria-pressed="false"]{opacity:.45}
+.src[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+
+.status{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-block:10px 4px}
+
+/* Pull to refresh */
+.ptr{height:0;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.ptr svg{width:20px;height:20px;transition:transform .15s}
+
+/* Lead story */
+.lead{margin-block:12px 4px}
+.lead a{display:grid;gap:10px;color:inherit;text-decoration:none}
+.lead figure{margin:0;aspect-ratio:16/9;max-width:100%;border-radius:var(--r);overflow:hidden;background:var(--sunk)}
+.lead img{width:100%;height:100%;object-fit:cover;display:block}
+.lead h2{margin:0;font-family:var(--font-head);font-size:23px;font-weight:700;line-height:1.5;text-wrap:balance}
+.lead p{margin:0;color:var(--muted);font-size:15px}
+.lead.en a{direction:ltr;text-align:left}
+.lead.en h2{font-family:var(--font-ui);font-weight:600;font-size:21px}
+
+/* Time bands */
+.band{margin-block:22px 0}
+.band h3{margin:0;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.band h3::after{content:"";flex:1;height:1px;background:var(--rule)}
+.band h3 span{color:var(--faint);font-weight:400}
+.stream{list-style:none;margin:0;padding:0}
+
+/* Item */
+.item{border-bottom:1px solid var(--rule);position:relative}
+.item:last-child{border-bottom:0}
+.item a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding-block:14px;color:inherit;text-decoration:none}
+.txt{display:grid;gap:4px;align-content:start;min-width:0}
+.meta{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .meta b{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c)}
-.meta b::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
-.item h2{margin:0;font-family:var(--font-head);font-size:18px;font-weight:600;line-height:1.55;text-wrap:balance}
-.item p{margin:0;font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.item.read h2{color:var(--muted)}
-.item.en a{direction:ltr;text-align:left}
+.meta b::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.meta .nw{color:var(--new);font-weight:600}
+.item h4{margin:0;font-family:var(--font-head);font-size:17.5px;font-weight:600;line-height:1.55;text-wrap:pretty}
+.item p{margin:0;font-size:13.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item figure{margin:0;width:92px;height:92px;border-radius:10px;overflow:hidden;background:var(--sunk);align-self:start;margin-top:4px}
+.item figure img{width:100%;height:100%;object-fit:cover;display:block}
+.item.read h4,.lead.read h2{color:var(--muted)}
+.item.read figure{opacity:.6}
+.item.en a{direction:ltr}
+.item.en .txt{text-align:left}
 .item.en .meta{direction:rtl;justify-content:flex-end}
-.item.en h2{font-family:var(--font-ui);font-weight:500;font-size:16.5px;line-height:1.5}
+.item.en h4{font-family:var(--font-ui);font-weight:500;font-size:16px;line-height:1.5}
+
+/* States */
+.skel{display:grid;gap:18px;margin-block:16px}
+.skel div{height:74px;border-radius:10px;background:linear-gradient(90deg,var(--sunk),var(--surface),var(--sunk));background-size:200% 100%;animation:sh 1.2s infinite}
+.skel div:first-child{height:190px}
+@keyframes sh{to{background-position:-200% 0}}
 .empty{padding-block:48px;text-align:center;color:var(--muted)}
 .empty h3{font-family:var(--font-head);color:var(--ink);font-size:19px;margin:0 0 6px}
+.empty p{margin:0}
 .install{margin-block:14px 0;background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
-.install button{appearance:none;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
-@media (prefers-reduced-motion:reduce){.refresh.spin svg{animation:none}}
+.install button{appearance:none;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:13px;transition:.25s;pointer-events:none;z-index:30}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.foot{font-size:12px;color:var(--faint);text-align:center;padding-block:28px 24px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="mast">
-      <h1>موجز<span>.</span></h1>
-      <div class="right">
-        <span class="date" id="today"></span>
-        <button class="refresh" id="refresh" aria-label="تحديث">
+      <div class="brand"><h1>موجز<span>.</span></h1><small id="today"></small></div>
+      <div class="icons">
+        <button class="ib" id="search-btn" aria-label="بحث" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+        <button class="ib" id="refresh" aria-label="تحديث">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
         </button>
       </div>
     </div>
-    <nav class="tabs" aria-label="اللغة">
-      <button class="tab" data-lang="all" aria-pressed="true">الكل</button>
-      <button class="tab" data-lang="ar" aria-pressed="false">عربي</button>
-      <button class="tab" data-lang="en" aria-pressed="false">English</button>
+    <div class="search" id="search-box" hidden><input id="q" type="search" placeholder="ابحث في العناوين…" autocomplete="off"></div>
+    <nav class="seg" id="seg" aria-label="اللغة">
+      <span class="thumb" id="seg-thumb"></span>
+      <button data-lang="all" aria-pressed="true">الكل</button>
+      <button data-lang="ar" aria-pressed="false">عربي</button>
+      <button data-lang="en" aria-pressed="false">English</button>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
+  <div class="ptr" id="ptr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
   <div class="install" id="install" hidden>
     <span>لتثبيت موجز كتطبيق: اضغط زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية».</span>
     <button id="install-x" aria-label="إغلاق">×</button>
   </div>
   <div class="sources" id="sources"></div>
   <div class="status"><span id="updated">جارٍ تحميل الأخبار…</span><span id="count"></span></div>
-  <ul class="stream" id="stream"></ul>
+  <div class="skel" id="skel"><div></div><div></div><div></div><div></div></div>
+  <section class="lead" id="lead" hidden></section>
+  <div id="bands"></div>
   <div class="empty" id="empty" hidden>
-    <h3>لا توجد أخبار لعرضها</h3>
-    <p>جرّب إظهار مصادر أخرى أو اضغط زر التحديث.</p>
+    <h3 id="empty-h">لا توجد أخبار لعرضها</h3>
+    <p id="empty-p">جرّب إظهار مصادر أخرى أو اسحب للأسفل للتحديث.</p>
   </div>
+  <p class="foot">تُجمع العناوين تلقائيًا كل ساعة من المواقع الإخبارية مباشرة</p>
 </main>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function(){
@@ -114,24 +182,56 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
   const dark=matchMedia("(prefers-color-scheme: dark)");
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
                set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-  const state={lang:store.get("lang","all"),hidden:new Set(store.get("hidden",[])),read:new Set(store.get("read",[])),feeds:[],generatedAt:null};
   const $=id=>document.getElementById(id);
+  const state={lang:store.get("lang","all"),hidden:new Set(store.get("hidden",[])),read:new Set(store.get("read",[])),
+    q:"",feeds:[],generatedAt:null,lastSeen:store.get("lastSeen",0)};
+  // "new" = published after the previous visit
+  const prevSeen=state.lastSeen; store.set("lastSeen",Date.now());
 
   $("today").textContent=new Intl.DateTimeFormat("ar",{weekday:"long",day:"numeric",month:"long"}).format(new Date());
   const rtf=new Intl.RelativeTimeFormat("ar",{numeric:"auto"});
+  const ts=iso=>{const t=Date.parse(iso||"");return isNaN(t)?0:t};
   function ago(iso){
-    const t=Date.parse(iso||"");if(isNaN(t))return"";
+    const t=ts(iso);if(!t)return"";
     const s=(t-Date.now())/1000,a=Math.abs(s);
-    if(a<3600)return rtf.format(Math.min(-1,Math.round(s/60)),"minute");
+    if(a<60)return"الآن";
+    if(a<3600)return rtf.format(Math.round(s/60),"minute");
     if(a<86400)return rtf.format(Math.round(s/3600),"hour");
     return rtf.format(Math.round(s/86400),"day");
   }
   const color=f=>(dark.matches?COLORS_DARK:COLORS)[f.order%COLORS.length];
+  function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),1800)}
 
-  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.lang=b.dataset.lang;store.set("lang",state.lang);render()}));
+  // Language segmented control
+  const segBtns=[...document.querySelectorAll("#seg button")];
+  segBtns.forEach((b,i)=>b.addEventListener("click",()=>{state.lang=b.dataset.lang;store.set("lang",state.lang);render();scrollTo({top:0,behavior:"smooth"})}));
+
+  // Search
+  $("search-btn").addEventListener("click",()=>{
+    const open=$("search-box").hidden;$("search-box").hidden=!open;$("search-btn").setAttribute("aria-pressed",String(open));
+    if(open)$("q").focus();else{$("q").value="";state.q="";render()}
+  });
+  $("q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase();render()});
+
+  function markRead(u,el){state.read.add(u);store.set("read",[...state.read].slice(-500));el.classList.add("read")}
+  function img(src,cls){
+    const f=document.createElement("figure");if(cls)f.className=cls;
+    const i=document.createElement("img");i.src=src;i.alt="";i.loading="lazy";i.decoding="async";i.referrerPolicy="no-referrer";
+    i.onerror=()=>f.remove();f.append(i);return f;
+  }
+  function meta(it){
+    const m=document.createElement("div");m.className="meta";
+    const b=document.createElement("b");b.textContent=it.f.name;m.append(b);
+    const w=ago(it.d);if(w){const s=document.createElement("span");s.textContent=w;m.append(s)}
+    if(prevSeen&&ts(it.d)>prevSeen&&!state.read.has(it.u)){const n=document.createElement("span");n.className="nw";n.textContent="• جديد";m.append(n)}
+    return m;
+  }
 
   function render(){
-    document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===state.lang)));
+    const li=segBtns.findIndex(b=>b.dataset.lang===state.lang);
+    segBtns.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===state.lang)));
+    $("seg-thumb").style.transform="translateX("+(-li*100)+"%)";
+
     const visible=state.feeds.filter(f=>state.lang==="all"||f.lang===state.lang);
     const box=$("sources");box.textContent="";
     visible.forEach(f=>{
@@ -141,56 +241,109 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
       b.addEventListener("click",()=>{state.hidden.has(f.id)?state.hidden.delete(f.id):state.hidden.add(f.id);store.set("hidden",[...state.hidden]);render()});
       box.append(b);
     });
-    const items=[];
-    visible.forEach(f=>{if(!state.hidden.has(f.id))(f.items||[]).forEach((it,r)=>items.push({...it,f,r}))});
-    items.sort((a,b)=>((Date.parse(b.d||"")||0)-(Date.parse(a.d||"")||0))||a.r-b.r);
-    const ul=$("stream");ul.textContent="";
-    items.slice(0,150).forEach(it=>{
-      if(!/^https:\/\//.test(it.u||""))return;
-      const li=document.createElement("li");li.className="item"+(it.f.lang==="en"?" en":"")+(state.read.has(it.u)?" read":"");
-      li.style.setProperty("--c",color(it.f));
-      const a=document.createElement("a");a.href=it.u;a.target="_blank";a.rel="noopener";
-      a.addEventListener("click",()=>{state.read.add(it.u);store.set("read",[...state.read].slice(-400));li.classList.add("read")});
-      const m=document.createElement("div");m.className="meta";
-      const b=document.createElement("b");b.textContent=it.f.name;m.append(b);
-      const w=ago(it.d);if(w){const s=document.createElement("span");s.textContent="· "+w;m.append(s)}
-      const h=document.createElement("h2");h.textContent=it.t;if(it.f.lang==="en")h.lang="en";
-      a.append(m,h);
-      if(it.s&&it.s!==it.t){const p=document.createElement("p");p.textContent=it.s;if(it.f.lang==="en")p.lang="en";a.append(p)}
-      li.append(a);ul.append(li);
+
+    let items=[];const seen=new Set();
+    visible.forEach(f=>{if(!state.hidden.has(f.id))(f.items||[]).forEach((it,r)=>{
+      if(!/^https:\/\//.test(it.u||"")||seen.has(it.u))return;seen.add(it.u);items.push({...it,f,r})})});
+    if(state.q)items=items.filter(it=>(it.t+" "+(it.s||"")).toLowerCase().includes(state.q));
+    items.sort((a,b)=>(ts(b.d)-ts(a.d))||a.r-b.r);
+    items=items.slice(0,160);
+
+    // Lead: newest story with a photo from the last 6 hours (not while searching)
+    const leadEl=$("lead");leadEl.textContent="";leadEl.hidden=true;
+    let lead=null;
+    if(!state.q){lead=items.find(it=>it.i&&Date.now()-ts(it.d)<6*3600e3)||null}
+    if(lead){
+      items=items.filter(x=>x!==lead);
+      leadEl.className="lead"+(lead.f.lang==="en"?" en":"")+(state.read.has(lead.u)?" read":"");
+      leadEl.style.setProperty("--c",color(lead.f));
+      const a=document.createElement("a");a.href=lead.u;a.target="_blank";a.rel="noopener";
+      a.addEventListener("click",()=>markRead(lead.u,leadEl));
+      const h=document.createElement("h2");h.textContent=lead.t;
+      a.append(img(lead.i),meta(lead),h);
+      if(lead.s&&lead.s!==lead.t){const p=document.createElement("p");p.textContent=lead.s;a.append(p)}
+      leadEl.append(a);leadEl.hidden=false;
+    }
+
+    // Time bands
+    const now=new Date(),startToday=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+    const BANDS=[["الساعة الأخيرة",t=>t&&Date.now()-t<3600e3],["اليوم",t=>t>=startToday],["أمس",t=>t>=startToday-864e5],["أقدم",()=>true]];
+    const groups=BANDS.map(()=>[]);
+    items.forEach(it=>{const t=ts(it.d);groups[BANDS.findIndex(([,fn])=>fn(t))].push(it)});
+    const wrap=$("bands");wrap.textContent="";
+    groups.forEach((g,gi)=>{
+      if(!g.length)return;
+      const sec=document.createElement("section");sec.className="band";
+      const h=document.createElement("h3");h.textContent=BANDS[gi][0]+" ";
+      const c=document.createElement("span");c.textContent="("+g.length+")";h.append(c);
+      const ul=document.createElement("ul");ul.className="stream";
+      g.forEach(it=>{
+        const li=document.createElement("li");li.className="item"+(it.f.lang==="en"?" en":"")+(state.read.has(it.u)?" read":"");
+        li.style.setProperty("--c",color(it.f));
+        const a=document.createElement("a");a.href=it.u;a.target="_blank";a.rel="noopener";
+        a.addEventListener("click",()=>markRead(it.u,li));
+        const tx=document.createElement("div");tx.className="txt";
+        const h4=document.createElement("h4");h4.textContent=it.t;if(it.f.lang==="en")h4.lang="en";
+        tx.append(meta(it),h4);
+        if(it.s&&it.s!==it.t){const p=document.createElement("p");p.textContent=it.s;if(it.f.lang==="en")p.lang="en";tx.append(p)}
+        a.append(tx);if(it.i)a.append(img(it.i));
+        li.append(a);
+        ul.append(li);
+      });
+      sec.append(h,ul);wrap.append(sec);
     });
-    $("empty").hidden=items.length>0||!state.generatedAt;
-    $("count").textContent=items.length?items.length+" خبرًا":"";
-    if(state.generatedAt)$("updated").textContent="آخر تحديث "+ago(state.generatedAt);
+
+    const total=items.length+(lead?1:0);
+    $("skel").hidden=!!state.generatedAt||state.feeds.length>0;
+    $("empty").hidden=total>0||!state.generatedAt;
+    $("empty-h").textContent=state.q?"لا نتائج لهذا البحث":"لا توجد أخبار لعرضها";
+    $("empty-p").textContent=state.q?"جرّب كلمة أخرى.":"جرّب إظهار مصادر أخرى أو اسحب للأسفل للتحديث.";
+    $("count").textContent=total?total+" خبرًا":"";
+    if(state.generatedAt&&!load.offline)$("updated").textContent="آخر تحديث "+ago(state.generatedAt);
   }
 
-  async function load(){
+  async function load(manual){
     const btn=$("refresh");btn.classList.add("spin");
     try{
       const r=await fetch("news.json?t="+Date.now(),{cache:"no-store"});
       if(!r.ok)throw new Error(r.status);
       const data=await r.json();
-      state.feeds=(data.feeds||[]).sort((a,b)=>a.order-b.order);state.generatedAt=data.generatedAt;
+      const changed=data.generatedAt!==state.generatedAt;
+      state.feeds=(data.feeds||[]).sort((a,b)=>a.order-b.order);state.generatedAt=data.generatedAt;load.offline=false;
       store.set("cache",data);
+      if(manual)toast(changed?"تم التحديث":"الأخبار محدّثة");
     }catch(e){
       const c=store.get("cache",null);
       if(c){state.feeds=c.feeds||[];state.generatedAt=c.generatedAt}
-      $("updated").textContent="لا يوجد اتصال، تُعرض آخر أخبار محفوظة";
+      load.offline=true;$("updated").textContent="لا يوجد اتصال، تُعرض آخر أخبار محفوظة";
+      if(manual)toast("لا يوجد اتصال");
     }
     btn.classList.remove("spin");render();
   }
-  $("refresh").addEventListener("click",load);
+  $("refresh").addEventListener("click",()=>load(true));
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
   dark.addEventListener?.("change",render);
   setInterval(render,60000);
+
+  // Pull to refresh (touch)
+  let y0=null,pulled=0;const ptr=$("ptr");
+  addEventListener("touchstart",e=>{if(scrollY<=0)y0=e.touches[0].clientY},{passive:true});
+  addEventListener("touchmove",e=>{
+    if(y0==null)return;pulled=Math.max(0,Math.min(90,(e.touches[0].clientY-y0)*.5));
+    ptr.style.height=pulled+"px";ptr.firstElementChild.style.transform="rotate("+(pulled>60?180:0)+"deg)";
+  },{passive:true});
+  addEventListener("touchend",()=>{
+    if(y0==null)return;if(pulled>60)load(true);
+    y0=null;pulled=0;ptr.style.transition="height .2s";ptr.style.height="0";setTimeout(()=>ptr.style.transition="",200);
+  });
 
   const standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
   if(!standalone&&/iPhone|iPad/.test(navigator.userAgent)&&!store.get("installHidden",false))$("install").hidden=false;
   $("install-x").addEventListener("click",()=>{$("install").hidden=true;store.set("installHidden",true)});
 
   if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-  const c=store.get("cache",null);if(c){state.feeds=c.feeds||[];state.generatedAt=c.generatedAt;render()}
-  load();
+  const c=store.get("cache",null);if(c){state.feeds=(c.feeds||[]).sort((a,b)=>a.order-b.order);state.generatedAt=c.generatedAt}
+  render();load();
 })();
 </script>
 </body>
