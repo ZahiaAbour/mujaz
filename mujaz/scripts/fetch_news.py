@@ -76,6 +76,38 @@ def parse_date(s):
     return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+IMG_RE = re.compile(r"""<img[^>]+src=["']([^"']+)["']""", re.I)
+
+
+def find_image(e):
+    """Best-effort photo for an item: media:content / media:thumbnail,
+    an image enclosure, or the first <img> inside the description."""
+    best, best_w = "", -1
+    for c in e.iter():
+        name = local(c.tag)
+        url = c.get("url") or ""
+        if name in ("content", "thumbnail") and url:
+            if c.get("medium") not in (None, "image") and name == "content":
+                continue
+            try:
+                w = int(c.get("width") or 0)
+            except ValueError:
+                w = 0
+            if w > best_w:
+                best, best_w = url, w
+        elif name == "enclosure" and url and (c.get("type") or "").startswith("image"):
+            if best_w < 0:
+                best, best_w = url, 0
+    if not best:
+        m = IMG_RE.search(child_text(e, "description", "summary", "encoded") or "")
+        if m:
+            best = html.unescape(m.group(1))
+    if best.startswith("//"):
+        best = "https:" + best
+    best = best.replace("http://", "https://", 1)
+    return best if best.startswith("https://") else ""
+
+
 def fetch(src):
     req = urllib.request.Request(src["url"], headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=25) as r:
@@ -93,6 +125,7 @@ def fetch(src):
             "u": link.replace("http://", "https://", 1),
             "d": parse_date(child_text(e, "pubdate", "published", "updated", "date")),
             "s": clean(child_text(e, "description", "summary"), 220),
+            "i": find_image(e),
         })
     items.sort(key=lambda i: i["d"] or "", reverse=True)
     return items[:MAX_ITEMS]
