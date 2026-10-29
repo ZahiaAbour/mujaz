@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>موجز</title>
+<meta name="description" content="آخر الأخبار من الجزيرة وبي بي سي وسكاي نيوز عربية وغيرها في مكان واحد">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="موجز">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#F2F3EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121714" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600;700&family=Reem+Kufi:wght@700&display=swap">
+<style>
+:root{
+  --paper:#F2F3EF; --surface:#FFFFFF; --ink:#18201C; --muted:#5E6B64; --rule:#D9DDD6;
+  --accent:#1E6A4E; --accent-soft:#E2EEE7;
+  --font-mast:"Reem Kufi","Noto Naskh Arabic",serif;
+  --font-head:"Noto Naskh Arabic","Geeza Pro","Times New Roman",serif;
+  --font-ui:"IBM Plex Sans Arabic","Geeza Pro",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#121714; --surface:#1A211D; --ink:#E7ECE8; --muted:#97A39C; --rule:#2B3530;
+  --accent:#5FBF95; --accent-soft:#1D3229; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.6;
+  padding-bottom:env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
+.mast{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px 6px}
+.mast h1{margin:0;font-family:var(--font-mast);font-size:30px;line-height:1}
+.mast h1 span{color:var(--accent)}
+.right{display:flex;align-items:center;gap:10px}
+.date{font-size:13px;color:var(--muted)}
+.refresh{appearance:none;border:1px solid var(--rule);background:var(--surface);color:var(--ink);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.refresh svg{width:18px;height:18px}
+.refresh.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(-360deg)}}
+.tabs{display:flex;gap:6px;padding-block:4px 10px}
+.tab{appearance:none;border:1px solid var(--rule);background:transparent;color:var(--ink);font:500 14px var(--font-ui);padding:6px 16px;border-radius:999px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sources{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-block:14px 2px;padding-bottom:2px}
+.sources::-webkit-scrollbar{display:none}
+.src{appearance:none;flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:500 13px var(--font-ui);padding:5px 11px;border-radius:6px;cursor:pointer}
+.src i{width:8px;height:8px;border-radius:2px;background:var(--c)}
+.src[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
+.status{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-block:10px 0}
+.stream{list-style:none;margin:0;padding:0 0 32px}
+.item{border-bottom:1px solid var(--rule)}
+.item a{display:grid;gap:4px;padding-block:14px;color:inherit;text-decoration:none}
+.meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.meta b{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c)}
+.meta b::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+.item h2{margin:0;font-family:var(--font-head);font-size:18px;font-weight:600;line-height:1.55;text-wrap:balance}
+.item p{margin:0;font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item.read h2{color:var(--muted)}
+.item.en a{direction:ltr;text-align:left}
+.item.en .meta{direction:rtl;justify-content:flex-end}
+.item.en h2{font-family:var(--font-ui);font-weight:500;font-size:16.5px;line-height:1.5}
+.empty{padding-block:48px;text-align:center;color:var(--muted)}
+.empty h3{font-family:var(--font-head);color:var(--ink);font-size:19px;margin:0 0 6px}
+.install{margin-block:14px 0;background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.install button{appearance:none;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.refresh.spin svg{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="mast">
+      <h1>موجز<span>.</span></h1>
+      <div class="right">
+        <span class="date" id="today"></span>
+        <button class="refresh" id="refresh" aria-label="تحديث">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="اللغة">
+      <button class="tab" data-lang="all" aria-pressed="true">الكل</button>
+      <button class="tab" data-lang="ar" aria-pressed="false">عربي</button>
+      <button class="tab" data-lang="en" aria-pressed="false">English</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="install" id="install" hidden>
+    <span>لتثبيت موجز كتطبيق: اضغط زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية».</span>
+    <button id="install-x" aria-label="إغلاق">×</button>
+  </div>
+  <div class="sources" id="sources"></div>
+  <div class="status"><span id="updated">جارٍ تحميل الأخبار…</span><span id="count"></span></div>
+  <ul class="stream" id="stream"></ul>
+  <div class="empty" id="empty" hidden>
+    <h3>لا توجد أخبار لعرضها</h3>
+    <p>جرّب إظهار مصادر أخرى أو اضغط زر التحديث.</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  const COLORS=["#B07A12","#B5302A","#2F62A8","#1E7F8C","#3E7A3A","#C2512B","#7A4FA8","#4E5B66"];
+  const COLORS_DARK=["#E0AE4C","#EF7B72","#7EA9E8","#5FC2CF","#86C47F","#EB8A66","#B596E6","#A3B0BB"];
+  const dark=matchMedia("(prefers-color-scheme: dark)");
+  const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+               set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+  const state={lang:store.get("lang","all"),hidden:new Set(store.get("hidden",[])),read:new Set(store.get("read",[])),feeds:[],generatedAt:null};
+  const $=id=>document.getElementById(id);
+
+  $("today").textContent=new Intl.DateTimeFormat("ar",{weekday:"long",day:"numeric",month:"long"}).format(new Date());
+  const rtf=new Intl.RelativeTimeFormat("ar",{numeric:"auto"});
+  function ago(iso){
+    const t=Date.parse(iso||"");if(isNaN(t))return"";
+    const s=(t-Date.now())/1000,a=Math.abs(s);
+    if(a<3600)return rtf.format(Math.min(-1,Math.round(s/60)),"minute");
+    if(a<86400)return rtf.format(Math.round(s/3600),"hour");
+    return rtf.format(Math.round(s/86400),"day");
+  }
+  const color=f=>(dark.matches?COLORS_DARK:COLORS)[f.order%COLORS.length];
+
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.lang=b.dataset.lang;store.set("lang",state.lang);render()}));
+
+  function render(){
+    document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===state.lang)));
+    const visible=state.feeds.filter(f=>state.lang==="all"||f.lang===state.lang);
+    const box=$("sources");box.textContent="";
+    visible.forEach(f=>{
+      const b=document.createElement("button");b.className="src";b.style.setProperty("--c",color(f));
+      b.setAttribute("aria-pressed",String(!state.hidden.has(f.id)));
+      b.append(document.createElement("i"),document.createTextNode(f.name));
+      b.addEventListener("click",()=>{state.hidden.has(f.id)?state.hidden.delete(f.id):state.hidden.add(f.id);store.set("hidden",[...state.hidden]);render()});
+      box.append(b);
+    });
+    const items=[];
+    visible.forEach(f=>{if(!state.hidden.has(f.id))(f.items||[]).forEach((it,r)=>items.push({...it,f,r}))});
+    items.sort((a,b)=>((Date.parse(b.d||"")||0)-(Date.parse(a.d||"")||0))||a.r-b.r);
+    const ul=$("stream");ul.textContent="";
+    items.slice(0,150).forEach(it=>{
+      if(!/^https:\/\//.test(it.u||""))return;
+      const li=document.createElement("li");li.className="item"+(it.f.lang==="en"?" en":"")+(state.read.has(it.u)?" read":"");
+      li.style.setProperty("--c",color(it.f));
+      const a=document.createElement("a");a.href=it.u;a.target="_blank";a.rel="noopener";
+      a.addEventListener("click",()=>{state.read.add(it.u);store.set("read",[...state.read].slice(-400));li.classList.add("read")});
+      const m=document.createElement("div");m.className="meta";
+      const b=document.createElement("b");b.textContent=it.f.name;m.append(b);
+      const w=ago(it.d);if(w){const s=document.createElement("span");s.textContent="· "+w;m.append(s)}
+      const h=document.createElement("h2");h.textContent=it.t;if(it.f.lang==="en")h.lang="en";
+      a.append(m,h);
+      if(it.s&&it.s!==it.t){const p=document.createElement("p");p.textContent=it.s;if(it.f.lang==="en")p.lang="en";a.append(p)}
+      li.append(a);ul.append(li);
+    });
+    $("empty").hidden=items.length>0||!state.generatedAt;
+    $("count").textContent=items.length?items.length+" خبرًا":"";
+    if(state.generatedAt)$("updated").textContent="آخر تحديث "+ago(state.generatedAt);
+  }
+
+  async function load(){
+    const btn=$("refresh");btn.classList.add("spin");
+    try{
+      const r=await fetch("news.json?t="+Date.now(),{cache:"no-store"});
+      if(!r.ok)throw new Error(r.status);
+      const data=await r.json();
+      state.feeds=(data.feeds||[]).sort((a,b)=>a.order-b.order);state.generatedAt=data.generatedAt;
+      store.set("cache",data);
+    }catch(e){
+      const c=store.get("cache",null);
+      if(c){state.feeds=c.feeds||[];state.generatedAt=c.generatedAt}
+      $("updated").textContent="لا يوجد اتصال، تُعرض آخر أخبار محفوظة";
+    }
+    btn.classList.remove("spin");render();
+  }
+  $("refresh").addEventListener("click",load);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
+  dark.addEventListener?.("change",render);
+  setInterval(render,60000);
+
+  const standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
+  if(!standalone&&/iPhone|iPad/.test(navigator.userAgent)&&!store.get("installHidden",false))$("install").hidden=false;
+  $("install-x").addEventListener("click",()=>{$("install").hidden=true;store.set("installHidden",true)});
+
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+  const c=store.get("cache",null);if(c){state.feeds=c.feeds||[];state.generatedAt=c.generatedAt;render()}
+  load();
+})();
+</script>
+</body>
+</html>
