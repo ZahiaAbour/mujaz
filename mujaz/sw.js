@@ -1,5 +1,5 @@
 // Keeps the app shell available offline. News is always fetched fresh.
-const CACHE = "mujaz-v1";
+const CACHE = "mujaz-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
